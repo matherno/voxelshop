@@ -49,13 +49,7 @@ public class MGVExporter extends AbstractExporter {
             int z = voxel.z;
             int colIdx = colourRGBToIndex.get(col.getRGB());
 
-            int minx = getMax()[0] * -1;
-            int miny = getMax()[1] * -1;
-            int minz = getMin()[2];
-
-            x -= minx;
-            y -= miny;
-            z += minz;
+            x--;
 
             fileOut.writeUTF8String(x + "," + y + "," + z + "," + colIdx + "\n");
         }

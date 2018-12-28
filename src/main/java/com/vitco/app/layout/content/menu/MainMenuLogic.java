@@ -658,11 +658,19 @@ public class MainMenuLogic extends MenuLogicPrototype implements MenuLogicInterf
         LabelModule invertInfo = new LabelModule("This option effectively inverts order of the numbers in file names.");
         slicesExporter.addComponent(invertInfo);
 
+        // add mathernogl voxel "mgv" exporter
+        FieldSet mgvExporter = new FieldSet("mgv_format", "MGV Format (*.mgv)");
+
+        // add information for voxel format
+        LabelModule label_mgv = new LabelModule("Basic MathernoGL Voxel text format.");
+        label_mgv.setVisibleLookup("export_type=mgv_format");
+        mgvExporter.addComponent(label_mgv);
+
         // ---------------
 
         // add all formats
         dialog.addComboBox("export_type", new FieldSet[] {
-                collada, magicaVoxelExporter, voxVoxLapExporter, kv6Exporter, pnxExporter, qbExporter, slicesExporter, imageRenderer
+                collada, magicaVoxelExporter, voxVoxLapExporter, kv6Exporter, pnxExporter, qbExporter, slicesExporter, imageRenderer, mgvExporter
         }, 0);
 
         // ---------------
@@ -1166,6 +1174,54 @@ public class MainMenuLogic extends MenuLogicPrototype implements MenuLogicInterf
                                     exporter.setInvertOrder(dialog.is("slices_format.invert=true"));
 
                                     success = exporter.generateImages();
+                                } catch (IOException ignored) {
+                                    success = false;
+                                }
+                                if (success) {
+                                    console.addLine(
+                                            String.format(langSelector.getString("export_file_successful"),
+                                                    System.currentTimeMillis() - time)
+                                    );
+                                } else {
+                                    console.addLine(langSelector.getString("export_file_error"));
+                                }
+
+                                return null;
+                            }
+                        });
+
+                        // ===========
+                    } else if (dialog.is("export_type=mgv_format")) {
+
+                        // ===========
+                        // -- handle qb file format
+
+                        // create progress dialog
+                        final ProgressDialog progressDialog = new ProgressDialog(frame);
+
+                        // do the exporting
+                        progressDialog.start(new ProgressWorker() {
+                            @Override
+                            protected Object doInBackground() throws Exception {
+
+                                // extract file name
+                                final File exportTo = new File(baseName + (baseName.endsWith(".mgv") ? "" : ".mgv"));
+                                // check if file exists
+                                if (exportTo.exists()) {
+                                    if (JOptionPane.showConfirmDialog(frame,
+                                            exportTo.getPath() + " " + langSelector.getString("replace_file_query"),
+                                            langSelector.getString("replace_file_query_title"),
+                                            JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) {
+                                        return false;
+                                    }
+                                }
+
+                                // export qb file format
+                                boolean success;
+                                long time = System.currentTimeMillis();
+                                try {
+                                    MGVExporter exporter = new MGVExporter(exportTo, data, progressDialog, console);
+                                    success = exporter.writeData();
                                 } catch (IOException ignored) {
                                     success = false;
                                 }

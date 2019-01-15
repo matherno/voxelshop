@@ -660,6 +660,7 @@ public class MainMenuLogic extends MenuLogicPrototype implements MenuLogicInterf
 
         // add mathernogl voxel "mgv" exporter
         FieldSet mgvExporter = new FieldSet("mgv_format", "MGV Format (*.mgv)");
+        mgvExporter.addComponent(new CheckBoxModule("include_interior", "Inlcude Interior Voxels", false));
 
         // add information for voxel format
         LabelModule label_mgv = new LabelModule("Basic MathernoGL Voxel text format.");
@@ -1221,6 +1222,7 @@ public class MainMenuLogic extends MenuLogicPrototype implements MenuLogicInterf
                                 long time = System.currentTimeMillis();
                                 try {
                                     MGVExporter exporter = new MGVExporter(exportTo, data, progressDialog, console);
+                                    exporter.includeInteriorVoxels(dialog.is("mgv_format.include_interior=true"));
                                     success = exporter.writeData();
                                 } catch (IOException ignored) {
                                     success = false;
